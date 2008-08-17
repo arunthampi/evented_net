@@ -1,0 +1,1 @@
+This library enables you to make evented HTTP calls if an EventMachine reactor is running. If not, it falls back to a regular synchronous HTTP call. In both cases, you specify a proc which will be used as a callback with the HTTP code and the HTTP body being passed as parameters. This makes the API consistent for both evented and boring HTTP calls.
