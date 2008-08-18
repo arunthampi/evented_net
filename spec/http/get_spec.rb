@@ -42,3 +42,31 @@ describe "EventedNet::HTTP.get must make a synchronous HTTP Get request if Event
     EventedNet::HTTP.get(@uri, :callback => @callback)
   end
 end
+
+describe "EventedNet::HTTP.get must make an evented HTTP Get request if EventMachine is running" do
+  before(:each) do
+    @uri = URI.parse('http://www.google.com')
+    @callback = Proc.new {|a,b| puts "#{a},#{b}"}
+    
+    EM.should_receive(:reactor_running?).and_return(true)
+  end
+  
+  it "should call the private method evented_get if EventMachine is running" do
+    EventedNet::HTTP.should_receive(:evented_get).with(@uri, {:callback => @callback})
+    EventedNet::HTTP.get(@uri, :callback => @callback)
+  end
+  
+  it "should call the private method evented_get if EventMachine is running" do
+    EventedNet::HTTP.should_receive(:evented_get).with(@uri, {:callback => @callback})
+    EventedNet::HTTP.get(@uri, :callback => @callback)
+  end
+
+  it "should call the standard Ruby Net::HTTP.get_response method and then call the 'callback' proc object" do
+    mock_client = mock(EM::Protocols::HttpClient)
+    EM::Protocols::HttpClient.should_receive(:request).with({:host => 'www.google.com', :port => 80, :request => '', :query => nil}).and_return(mock_client)
+    
+    mock_client.should_receive(:callback)
+    
+    EventedNet::HTTP.get(@uri, :callback => @callback)
+  end
+end
