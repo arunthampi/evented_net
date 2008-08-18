@@ -17,7 +17,7 @@ module EventedNet
         def evented_get(uri, opts = {})
           http = EM::Protocols::HttpClient.request(
             :host => uri.host, :port => uri.port,
-            :request => uri.path, :query => uri.query
+            :request => uri.path, :query_string => uri.query
           )
           # Assign the user generated callback, as the callback for 
           # EM::Protocols::HttpClient

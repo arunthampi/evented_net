@@ -17,16 +17,23 @@ module EventedNet
         
         def evented_post(uri, opts)
           post_params = opts[:params] || {}
-          post_params = post_params.collect{ |k,v| "#{k}=#{v}"}.join('&')
+          post_params = post_params.collect{ |k,v| "#{urlencode(k.to_s)}=#{urlencode(v.to_s)}"}.join('&')
+          puts "Post Params: #{post_params}"
+          puts "URI Path: #{uri.path}"
           
           http = EM::Protocols::HttpClient.request(
             :host => uri.host, :port => uri.port,
-            :request => uri.path, :query => post_params,
+            :request => uri.path, :content => post_params,
+            :contenttype => opts[:content_type] || 'application/x-www-form-urlencoded',
             :verb => 'POST'
           )
           # Assign the user generated callback, as the callback for 
           # EM::Protocols::HttpClient
-          http.callback { |r| opts[:callback].call(r[:status], r[:content]) }
+          http.callback { |r| puts "#{r.inspect}"; opts[:callback].call(r[:status], r[:content]) }
+        end
+      
+        def urlencode(str)
+          str.gsub(/[^a-zA-Z0-9_\.\-]/n) {|s| sprintf('%%%02x', s[0]) }
         end
       
     end
