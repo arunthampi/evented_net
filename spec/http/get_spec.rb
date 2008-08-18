@@ -17,7 +17,28 @@ describe "EventedNet::HTTP.get must raise an exception if the conditions for the
     
     lambda { EventedNet::HTTP.get(uri, :callback => callback) }.should raise_error ArgumentError
   end
-
-  
 end
+
+describe "EventedNet::HTTP.get must make a synchronous HTTP Get request if EventMachine is not running" do
+  before(:each) do
+    @uri = URI.parse('http://www.google.com')
+    @callback = Proc.new {|a,b| puts "#{a},#{b}"}
+    @response = mock(Net::HTTPResponse)
+    @response.stub!(:code).and_return(200)
+    @response.stub!(:body).and_return('<body>hot</body>')
+    
+    EM.should_receive(:reactor_running?).and_return(false)
+  end
   
+  it "should call the private method synchronous_get if EventMachine is not running" do
+    EventedNet::HTTP.should_receive(:synchronous_get).with(@uri, {:callback => @callback})
+    EventedNet::HTTP.get(@uri, :callback => @callback)
+  end
+  
+  it "should call the standard Ruby Net::HTTP.get_response method and then call the 'callback' proc object" do
+    Net::HTTP.should_receive(:get_response).with(@uri).and_return(@response)
+    @callback.should_receive(:call).with(200, '<body>hot</body>')
+    
+    EventedNet::HTTP.get(@uri, :callback => @callback)
+  end
+end
