@@ -19,7 +19,8 @@ module EventedNet
             :host => uri.host, :port => uri.port,
             :request => uri.path, :query => uri.query
           )
-          # Make the call back of evented_get, call the user-generated callback
+          # Assign the user generated callback, as the callback for 
+          # EM::Protocols::HttpClient
           http.callback { |r| opts[:callback].call(r[:status], r[:content]) }
         end
     end
