@@ -1,7 +1,7 @@
 # Most of this code is stolen from Igvita's excellent blog post on EventMachine:
 # http://www.igvita.com/2008/05/27/ruby-eventmachine-the-speed-demon/
 
-require 'evented_net'
+require File.dirname(__FILE__) + "/../lib/evented_net"
 require 'evma_httpserver'
 
 class Handler  < EventMachine::Connection
