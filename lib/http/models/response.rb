@@ -22,6 +22,12 @@ module EventedNet
 
       # Freeze some Rack header names
       RACK_INPUT        = 'rack.input'.freeze
+      RACK_VERSION      = 'rack.version'.freeze
+      RACK_ERRORS       = 'rack.errors'.freeze
+      RACK_MULTITHREAD  = 'rack.multithread'.freeze
+      RACK_MULTIPROCESS = 'rack.multiprocess'.freeze
+      RACK_RUN_ONCE     = 'rack.run_once'.freeze
+      
 
       # CGI-like request environment variables
       attr_reader :env
@@ -37,7 +43,13 @@ module EventedNet
         @body     = StringIO.new
         @env      = {
           SERVER_SOFTWARE   => SERVER,
-          RACK_INPUT        => @body
+          RACK_INPUT        => @body,
+          RACK_VERSION      => [0,3].freeze,
+          RACK_ERRORS       => STDERR,
+
+          RACK_MULTITHREAD  => false,
+          RACK_MULTIPROCESS => false,
+          RACK_RUN_ONCE     => false
         }
       end
 
