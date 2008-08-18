@@ -5,9 +5,29 @@ module EventedNet
         unless uri.is_a?(URI) && (opts[:callback].is_a?(Proc) || opts[:callback].is_a?(Method)) && opts[:callback].arity == 2
           raise ArgumentError, "uri must be a URI and opts[:callback] must be a Proc (or Method) which takes 2 args"
         end
-        EM.reactor_running? ? evented_post(uri, opts) : evented_post(uri, opts)
+        EM.reactor_running? ? evented_post(uri, opts) : synchronous_post(uri, opts)
       end
       
+      private
+        def synchronous_post(uri, opts)
+          post_params = opts[:params] || {}
+          r = Net::HTTP.post_form(uri, post_params)
+          opts[:callback].call(r.code, r.body)
+        end
+        
+        def evented_post(uri, opts)
+          post_params = opts[:params] || {}
+          post_params = post_params.collect{ |k,v| "#{k}=#{v}"}.join('&')
+          
+          http = EM::Protocols::HttpClient.request(
+            :host => uri.host, :port => uri.port,
+            :request => uri.path, :query => post_params,
+            :verb => 'POST'
+          )
+          # Assign the user generated callback, as the callback for 
+          # EM::Protocols::HttpClient
+          http.callback { |r| opts[:callback].call(r[:status], r[:content]) }
+        end
       
     end
   end
