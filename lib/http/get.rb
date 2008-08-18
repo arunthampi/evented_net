@@ -15,7 +15,7 @@ module EventedNet
         end
         
         def evented_get(uri, opts = {})
-          http = EM::Protocols::HttpClient.request(
+          http = EventedNet::HTTP::Connection.request(
             :host => uri.host, :port => uri.port,
             :request => uri.path, :query_string => uri.query
           )
