@@ -9,6 +9,7 @@ The aim of this library is to make a consistent API for both synchronous and eve
 == Sample Code which uses EventedNet::HTTP POST call
 
 <pre>
+<code>
 
 require 'rubygems'
 require 'evented_net'
@@ -36,4 +37,5 @@ EventMachine::run {
   puts "Listening"
 }
 
+</code>
 </pre>
