@@ -194,7 +194,7 @@ module EventedNet
 
       # Called when part of the body has been read
       def on_body_data(data)
-        puts "Data: #{data}"
+        
 #        STDOUT.write data
 #        STDOUT.flush
       end

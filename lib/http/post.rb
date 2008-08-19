@@ -21,11 +21,14 @@ module EventedNet
           puts "Post Params: #{post_params}"
           puts "URI Path: #{uri.path}"
           
-          http = EM::Protocols::HttpClient.request(
+          http = EventedNet::HTTP::Connection.request(
             :host => uri.host, :port => uri.port,
             :request => uri.path, :content => post_params,
-            :contenttype => opts[:content_type] || 'application/x-www-form-urlencoded',
-            :verb => 'POST'
+            :head =>
+              {
+                'Content-type' => opts[:content_type] || 'application/x-www-form-urlencoded'
+              },
+            :method => 'POST'
           )
           # Assign the user generated callback, as the callback for 
           # EM::Protocols::HttpClient
