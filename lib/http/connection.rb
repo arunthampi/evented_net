@@ -1,33 +1,31 @@
-require 'socket'
-
 module EventedNet
   module HTTP
-     # A simple hash is returned for each request made by HttpClient with
-     # the headers that were given by the server for that request.
-     class HttpResponseHeader < Hash
-       # The reason returned in the http response ("OK","File not found",etc.)
-       attr_accessor :http_reason
+    # A simple hash is returned for each request made by HttpClient with
+    # the headers that were given by the server for that request.
+    class HttpResponseHeader < Hash
+      # The reason returned in the http response ("OK","File not found",etc.)
+      attr_accessor :http_reason
 
-       # The HTTP version returned.
-       attr_accessor :http_version
+      # The HTTP version returned.
+      attr_accessor :http_version
 
-       # The status code (as a string!)
-       attr_accessor :http_status
+      # The status code (as a string!)
+      attr_accessor :http_status
 
-       # HTTP response status as an integer
-       def status
-         Integer(http_status) rescue nil
-       end
+      # HTTP response status as an integer
+      def status
+        Integer(http_status) rescue nil
+      end
 
-       # Length of content as an integer, or nil if chunked/unspecified
-       def content_length
-         Integer(self[Connection::CONTENT_LENGTH]) rescue nil
-       end
+      # Length of content as an integer, or nil if chunked/unspecified
+      def content_length
+        Integer(self[Connection::CONTENT_LENGTH]) rescue nil
+      end
 
-       # Is the transfer encoding chunked?
-       def chunked_encoding?
-         /chunked/i === self[Connection::TRANSFER_ENCODING]
-       end
+      # Is the transfer encoding chunked?
+      def chunked_encoding?
+        /chunked/i === self[Connection::TRANSFER_ENCODING]
+      end
     end
 
     class HttpChunkHeader < Hash
@@ -140,6 +138,7 @@ module EventedNet
         @state = :response_header
         @data = Rev::Buffer.new
         @response_header = HttpResponseHeader.new
+        @response_body = ''
         @chunk_header = HttpChunkHeader.new
       end
       
@@ -194,13 +193,18 @@ module EventedNet
 
       # Called when part of the body has been read
       def on_body_data(data)
-        
-#        STDOUT.write data
-#        STDOUT.flush
+        @response_body = data
       end
 
       # Called when the request has completed
       def on_request_complete
+        # Reset the state of the client
+        @state, @connected = :response_header, false
+        set_deferred_status :succeeded, {
+          :content => @response_body,
+          :headers => @response_header,
+          :status => @response_header.status
+        }
         close_connection
       end
 
@@ -226,7 +230,7 @@ module EventedNet
             process_body
           when :finished, :invalid
             break
-          else raise RuntimeError, "invalid state: #{@state}"
+          else raise RuntimeError, "Invalid state: #{@state}"
           end
         end
       end
@@ -255,7 +259,7 @@ module EventedNet
         return false unless parse_header(@response_header)
 
         unless @response_header.http_status and @response_header.http_reason
-          on_error "no HTTP response"
+          on_error "No HTTP response"
           @state = :invalid
           return false
         end
@@ -302,7 +306,7 @@ module EventedNet
         if @data.read(2) == CRLF
           @state = :chunk_header
         else
-          on_error "non-CRLF chunk footer"
+          on_error "Non-CRLF chunk footer"
           @state = :invalid
         end
 
@@ -352,7 +356,7 @@ module EventedNet
           on_request_complete
           @state = :finished
         else
-          on_error "garbage at end of body"
+          on_error "Garbage at end of body"
           @state = :invalid
         end
 

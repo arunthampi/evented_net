@@ -18,8 +18,6 @@ module EventedNet
         def evented_post(uri, opts)
           post_params = opts[:params] || {}
           post_params = post_params.collect{ |k,v| "#{urlencode(k.to_s)}=#{urlencode(v.to_s)}"}.join('&')
-          puts "Post Params: #{post_params}"
-          puts "URI Path: #{uri.path}"
           
           http = EventedNet::HTTP::Connection.request(
             :host => uri.host, :port => uri.port,

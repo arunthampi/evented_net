@@ -62,8 +62,8 @@ describe "EventedNet::HTTP.get must make an evented HTTP Get request if EventMac
   end
 
   it "should call the standard Ruby Net::HTTP.get_response method and then call the 'callback' proc object" do
-    mock_client = mock(EM::Protocols::HttpClient)
-    EM::Protocols::HttpClient.should_receive(:request).with({:host => 'www.google.com', :port => 80, :request => '', :query => nil}).and_return(mock_client)
+    mock_client = mock(EventedNet::HTTP::Connection)
+    EventedNet::HTTP::Connection.should_receive(:request).with({:host => 'www.google.com', :port => 80, :request => '', :query => nil}).and_return(mock_client)
     
     mock_client.should_receive(:callback)
     
