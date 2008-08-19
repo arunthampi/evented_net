@@ -6,10 +6,9 @@ require 'eventmachine'
 require 'net/http'
 require 'uri'
 
-require 'thin_parser'
-require 'tempfile'
+require 'http11_client'
+require 'rev_buffer'
 
-require 'http/models/response'
 require 'http/connection'
 require 'http/get'
 require 'http/post'

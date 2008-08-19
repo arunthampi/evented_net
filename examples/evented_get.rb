@@ -12,7 +12,7 @@ class Handler  < EventMachine::Connection
   end
  
   def process_http_request
-    uri = URI.parse('http://www.google.com')
+    uri = URI.parse('http://www.maxmind.com/app/locate_ip')
     EventedNet::HTTP.get(uri, :callback => method(:process_evented_http_req))
   end
 end
