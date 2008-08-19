@@ -1,0 +1,35 @@
+= Introduction
+
+This library enables you to make evented HTTP calls if an EventMachine reactor is running.
+
+If not, it falls back to a regular synchronous HTTP call. In both cases, you specify a proc which will be used as a callback with the HTTP code and the HTTP body being passed as parameters.
+
+The aim of this library is to make a consistent API for both synchronous and evented HTTP calls.
+
+== Sample Code which uses EventedNet::HTTP POST call
+
+require 'rubygems'
+require 'evented_net'
+require 'evma_httpserver'
+require 'cgi'
+
+class Handler  < EventMachine::Connection
+  include EventMachine::HttpServer
+
+  def process_evented_http_req(code, body)
+    puts "Code: #{code} Body: #{body}"
+  end
+ 
+  def process_http_request
+    uri = URI.parse('http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi')
+    EventedNet::HTTP.post(uri, :callback => method(:process_evented_http_req), :params => {:Comments => 'Testing Attention Please'})
+  end
+end
+
+EventMachine::run {
+  # When running on Mac OS X, use EventMachine.kqueue
+  # When running on Linux 2.6.x kernels, use EventMachine.epoll
+  EventMachine.kqueue
+  EventMachine::start_server("0.0.0.0", 8082, Handler)
+  puts "Listening"
+}
