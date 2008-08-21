@@ -6,6 +6,10 @@ If not, it falls back to a regular synchronous HTTP call. In both cases, you spe
 
 The aim of this library is to make a consistent API for both synchronous and evented HTTP calls.
 
+== Acknowledgement
+
+The awesome blog post by Ilya Grigorik (http://www.igvita.com/2008/05/27/ruby-eventmachine-the-speed-demon/) really inspired me to dive into EventMachine, and the code samples that he's posted have been a real Godsend.
+
 == Sample Code which uses EventedNet::HTTP POST call
 
   require 'rubygems'
